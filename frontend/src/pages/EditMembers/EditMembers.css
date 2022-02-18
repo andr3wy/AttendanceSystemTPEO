@@ -1,4 +1,4 @@
-#Admin_Header {
+#Member_Header {
     position: absolute;
     top: 10%;
     width: 315px;
@@ -11,8 +11,55 @@
     font-weight: 500;
     font-size: 48px;
     line-height: 56px;
-    /*text-align: center;*/
-    color: black;
+    /*text-align: center;
+    background-color: pink;*/
+    color: #000000;
+  }
+
+/*span{
+  position: absolute;
+width: 48px;
+height: 21px;
+/*left: 289px;
+top: 170px;
+
+font-family: Roboto;
+font-style: normal;
+font-weight: normal;
+font-size: 18px;
+line-height: 21px;
+/* identical to box height 
+
+text-align: center;
+
+color: #B4B5B7;
+
+}*/
+  .topbarContainer {
+    height: 50px;
+    width: 100%;
+    /*background-color: #1877f2;*/
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 30%;
+    z-index: 999;
+  }
+  
+  .topbarLeft {
+    flex: 3;
+  }
+
+  .topbarCenter {
+    flex: 5;
+  }
+
+  .topbarRight {
+    flex: 4;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    color: white;
   }
 
   .event_buttons {
@@ -112,3 +159,4 @@ line-height: 21px;
 color: #C4C4C4;
   }
 
+  

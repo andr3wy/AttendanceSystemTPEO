@@ -32,7 +32,7 @@ export default function Home(props) {
   return (
     <Fragment>
       <div id="new_container">
-        <span> TPEO Attendance</span>
+        <h2 id= "home_header"> TPEO Attendance</h2>
         
             <input 
                 placeholder="Full Name"
@@ -42,7 +42,8 @@ export default function Home(props) {
             ></input>
         {console.log(name)}
     
-          <div id= "all_buttons">
+          
+        <div id= "all_buttons">
             <div className= "meeting_type_buttons">
                 <button id='meeting_button' onClick={() => setmeetingType("general")}>General Meeting</button> 
                 <button id='meeting_button' onClick={() => setmeetingType("engineering")}>Engineering</button>
@@ -50,10 +51,9 @@ export default function Home(props) {
                 <button id='meeting_button' onClick={() => setmeetingType("product")}> Product</button>
                 <button id='meeting_button' onClick={() => setmeetingType("design")}> Design</button>
             </div>
-            <div id= "check_in_button">
-                <button id='check_in_button' onClick={() => setcheckedIn(true)}>Check In</button> 
-            </div>
-            </div>
+            <button id='check_in_button' onClick={() => setcheckedIn(true)}>Check In</button>
+          </div>
+            
         
         <button
         className="admin-checkin-button"
