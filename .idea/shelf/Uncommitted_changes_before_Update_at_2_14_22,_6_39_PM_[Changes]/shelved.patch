@@ -1,0 +1,73 @@
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># AttendanceSystemTPEO\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision 81b7e68bc6e3e7bd7f7bbb94c6ce4ddee1e8e433)
++++ b/README.md	(date 1640581502141)
+@@ -1,1 +1,2 @@
+ # AttendanceSystemTPEO
++
+Index: backend/index.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\n\nconst express = require(\"express\");\nconst cors = require(\"cors\");\nconst admin = require(\"./firebase/cred.js\");\nconst dotenv = require(\"dotenv\").config();\n\n\nconst app = express();\nconst port = process.env.PORT;\n\nconst auth = require(\"./auth/auth.js\");\n\n\nconst database = admin.firestore();\n\n\n\n// Middleware\napp.use(cors());\napp.use(express.json());\n\napp.listen(port, () => {\n  console.log(`Example app listening on port ${port}!`)\n});\n\napp.post(\"/checkin\", async(request, response) => {\n  let name = request.body.name;\n  let type = request.body.type;\n  //TODO: change firestore database to host list of meetings attended\n\n  //time is done using Date.now()  - type this exactly in javascript frontend, returns exact time from 1970 in milliseconds\n  let time = request.body.checkin;\n\n  let nameToCheckIn = await database.collection('roster').where('name', '==', name).get();\n  let allMeetings = await database.collection('meetings').where('type', '==', type).get();\n  let correctMeeting = undefined;\n  //use \n  let validTime = false;\n  allMeetings.forEach((doc) => {\n    let meetingdata = doc.data();\n    \n    if(meetingdata.start.toMillis() <= time && meetingdata.end.toMillis() >= time && type === meetingdata.type) {\n      \n      validTime = true;\n      correctMeeting = doc;\n    }\n\n  })\n\n  if(!validTime) {\n    return response.json({msg: \"invalid time\"});\n  } else if(nameToCheckIn.empty) {\n    return response.json({msg: \"name is not valid\"});\n  } else {\n    nameToCheckIn.forEach((doc) => {\n      let docData = doc.data();\n\n      let meetingData = correctMeeting.data();\n\n      //TODO: add boolean to determine if already checked in\n      \n      if(!meetingData.people.includes(docData.name)) {\n        meetingData.people.push(docData.name);\n        if(type === \"pm\") {\n          docData.pm.push(correctMeeting.id);\n        }\n        if(type === \"gm\") {\n          docData.gm.push(correctMeeting.id);\n        }\n        if(type === \"em\") {\n          docData.em.push(correctMeeting.id);\n        }\n        if(type === \"dm\") {\n          docData.dm.push(correctMeeting.id);\n        }\n      }\n\n\n      correctMeeting.ref.set(meetingData);\n      doc.ref.set(docData);\n\n      \n    });\n\n    return response.json({msg: \"name is valid\"});\n  }\n});\n\n//TODO: add authentication\napp.post(\"/change-name\", async(request, response) => {\n  let name = request.body.name;\n  let newName = request.body.newName;\n\n  let temp = await database.collection('roster').where('name', '==', name).get();\n  if(temp.empty) {\n    return response.json({msg: \"name is not valid\"});\n  } else {\n    temp.forEach((doc) => {\n      let docData = doc.data();\n      docData.name = newName;\n      let pms = docData.pm;\n      let gms = docData.gm;\n      let ems = docData.em;\n      let dms = docData.dm;\n      let meetings = pms.concat(gms, ems, dms);\n\n      //update all the meetings that the person was in\n      meetings.forEach(async(meeting) => {\n        let meetingData = await database.collection('meetings').doc(meeting).get();\n        let meetingToUpdate = await database.collection('meetings').doc(meeting);\n        let dataToUpdate = meetingData.data();\n\n        let index = dataToUpdate.people.indexOf(name);\n        if(index !== -1) {\n          dataToUpdate.people[index] = newName;\n        }\n        meetingToUpdate.set(dataToUpdate);\n      })\n      doc.ref.set(docData);\n    });\n    return response.json({msg: \"name is valid\"});\n  }\n});\n\nlet allUsers = {};\napp.get(\"/current-time\", async(request, response) => {\n  let time = Date.now();\n  return response.json({time: time});\n});\napp.get(\"/all-users\", async(request, response) => {\n  let allUsers = await database.collection('roster').get();\n  let users = {};\n  allUsers.forEach((doc) => {\n    let docData = doc.data();\n    let name = docData.name;\n    users[name] = doc.id;\n  });\n  return response.json(users);\n});\n\n\n// //create meeting document under meetings collection\n// app.post(\"/create-meeting\", async(request, response) => {\n//   let type = request.body.type;\n//   let start =\n// });\n//\n//\n// app.post(\"/edit-meeting\", async(request, response) => {\n//   let meetingID = request.body.meetingID;\n//   let type = request.body.type;\n//   let start = request.body.start;\n//   let end = request.body.end;\n//   let people = request.body.people;\n//   let meeting = await database.collection('meetings').doc(meetingID);\n//   let meetingData = await meeting.get();\n//   let meetingToUpdate = meetingData.data();\n//   meetingToUpdate.type = type;\n//   meetingToUpdate.start = start;\n//   meetingToUpdate.end = end;\n//   meetingToUpdate.people = people;\n//   meeting.set(meetingToUpdate);\n//   return response.json({msg: \"meeting updated\"});\n// });\n\n\napp.get(\"/meetings\", async(request, response) => {\n  let name = request.body.name;\n  let nameDocument = await database.collection('roster').where('name', '==', name).get();\n\n})\n\n\n\n\n\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/backend/index.js b/backend/index.js
+--- a/backend/index.js	(revision 81b7e68bc6e3e7bd7f7bbb94c6ce4ddee1e8e433)
++++ b/backend/index.js	(date 1644537014520)
+@@ -140,13 +140,43 @@
+ });
+ 
+ 
++
+ // //create meeting document under meetings collection
+-// app.post("/create-meeting", async(request, response) => {
+-//   let type = request.body.type;
+-//   let start =
+-// });
+-//
+-//
++app.post("/create-meeting", async(request, response) => {
++  let type = request.body.type;
++  let start = request.body.start;
++  let end = request.body.end;
++  let countDoc = await database.collection('stats').doc(type).get();
++  let count = countDoc.data().num;
++
++  //TODO: check if there are any meetings of the same type at the same time
++  if(start > end) {
++    return response.json({msg: "invalid start time"});
++  }
++  let checkMeetings = await database.collection('meetings').where('type', '==', type).get();
++  checkMeetings.forEach(doc => {
++    let docData = doc.data();
++    if(docData.start.toMillis() <= end || docData.end.toMillis() >= start) {
++      return response.json({msg: "meeting has an overlap"});
++    }
++  });
++
++  console.log("testtt")
++  let meeting = await database.collection('meetings').add({
++    type: type,
++    start: start,
++    end: end,
++    people: [],
++    number: count
++
++  });
++  await countDoc.ref.set({
++    num: count + 1
++  });
++  return response.json({msg: "meeting created"});
++});
++
++
+ // app.post("/edit-meeting", async(request, response) => {
+ //   let meetingID = request.body.meetingID;
+ //   let type = request.body.type;

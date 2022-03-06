@@ -141,28 +141,85 @@ app.get("/all-users", async(request, response) => {
 
 
 // //create meeting document under meetings collection
-// app.post("/create-meeting", async(request, response) => {
-//   let type = request.body.type;
-//   let start =
-// });
-//
-//
-// app.post("/edit-meeting", async(request, response) => {
-//   let meetingID = request.body.meetingID;
-//   let type = request.body.type;
-//   let start = request.body.start;
-//   let end = request.body.end;
-//   let people = request.body.people;
-//   let meeting = await database.collection('meetings').doc(meetingID);
-//   let meetingData = await meeting.get();
-//   let meetingToUpdate = meetingData.data();
-//   meetingToUpdate.type = type;
-//   meetingToUpdate.start = start;
-//   meetingToUpdate.end = end;
-//   meetingToUpdate.people = people;
-//   meeting.set(meetingToUpdate);
-//   return response.json({msg: "meeting updated"});
-// });
+app.post("/create-meeting", async(request, response) => {
+  let type = request.body.type;
+  let start = request.body.start;
+  let end = request.body.end;
+  
+  let allMeetings = await database.collection('meetings').where('type', '==', type).get();
+  let validTime = false;
+  allMeetings.forEach((doc) => {
+    let meetingdata = doc.data();
+    
+    if(((meetingdata.start.toMillis() <= end && meetingdata.start.toMillis() >= start) ||  (meetingdata.end.toMillis() >= start && meetingdata.end.toMillis() <= end )) && type === meetingdata.type) {
+      
+      validTime = true;
+      correctMeeting = doc;
+    }
+
+  })
+  if(validTime) {
+    return response.json({msg: "event type overlap"})
+  }
+  const count = await database.collection('stats').doc(`${type}`);
+  let countTemp = count.data().num;
+  countTemp++;
+  count.set({
+    num: countTemp
+  });
+
+
+  const temp = await database.collection('meetings').add({
+    type: type,
+    start: Timestamp.fromDate(new Date(start)),
+    end: Timestamp.fromDate(new Date(end)),
+    number: countTemp
+    
+  })
+
+  return response.json({msg:"added successfully"});
+
+
+});
+
+
+app.post("/edit-meeting", async(request, response) => {
+  let meetingID = request.body.meetingID;
+  let type = request.body.type;
+  let start = request.body.start;
+  let end = request.body.end;
+  let people = request.body.people;
+  let meeting = await database.collection('meetings').doc(meetingID);
+  if(!meeting) {
+    return response.json({msg: "no such id"});
+  }
+  let meetingData = await meeting.get();
+  let meetingToUpdate = meetingData.data();
+  if(type) {
+    meetingToUpdate.type = type;
+  }
+  if(start) {
+    meetingToUpdate.start = start;
+  }
+  if(end) {
+    meetingToUpdate.end = end;
+  }
+  if(people) {
+    meetingToUpdate.people = people;
+  }
+   
+  meeting.set(meetingToUpdate);
+  return response.json({msg: "meeting updated"});
+});
+
+
+
+app.post("/create-user", async(request, response) => {
+  let name = request.body.name;
+  let nameRoster = await database.collection('roster');
+  let found = false;
+  // nameRoster.forEach((nameelement) => )
+})
 
 
 app.get("/meetings", async(request, response) => {
