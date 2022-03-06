@@ -12,33 +12,6 @@ export default function AdminCheckIn(props) {
   /*const route = useRoute();
   console.log(route.name);*/
 
-    /*let _index = props.state.index;
-    let _routeName = props.state.routeNames;
-    return  _routeName[_index]*/
-
-    //console.log(props.navigation.state.routeName);
-    //console.log(navigate.state.routeName);
-
-  const [name, setName] = useState('');
-  const [meetingType, setmeetingType] = useState('');
-  const [checkedIn, setcheckedIn] = useState(false);
-
-  function printName(input){
-    setName(input);
-    console.log(name);
-  }
-
-  /*function doTask(cur_index) {
-    setToDo(toDoTasks.filter((task) => task != toDoTasks[cur_index]));
-    setDone(finishedTasks, ... toDoTasks[cur_index]);
-  }
-
-  function removeTask(cur_index){
-    removedTask= finishedTasks[cur_index];
-    setDone(finishedTasks.filter((task) => task != removedTask));
-    setToDos(toDoTasks, ... removedTask);
-  }*/
-  // setName(event.target.value)
 
   return (
     <Fragment>
@@ -50,7 +23,7 @@ export default function AdminCheckIn(props) {
                         //console.log(this.route.name);
                         localStorage.removeItem("@token");
                         //navigate('/NewEvent')
-                        history.push("/NewEvent")
+                        history.push('/NewEvent')
                         }}>Create an Event</button> 
                     <button id= "event_button" onClick={() => history.push("/EditAccount")}>Edit Account</button>
                     <button id= "event_button" onClick={() => history.push("/MemberSearch")}>Member Search</button>
@@ -66,11 +39,11 @@ export default function AdminCheckIn(props) {
                       }>Dashboard</button> 
                     <button id = "function_button" onClick={() => 
                       //navigate('/AdminCheckIn')
-                      history.push('/AdminCheckIn')
+                      history.push('/NewEvent')
                       }>Events</button>
                     <button id = "function_button" onClick={() => 
                       //navigate('/AdminCheckIn')
-                      history.push('/AdminCheckIn')
+                      history.push("/EditMembers")
                       }>Members</button>
             </div>
         </div>

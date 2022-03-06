@@ -1,5 +1,6 @@
 //import "./AdminCheckIn.css";
 import "./AdminCheckIn.css";
+import ".//src/components/Table.js";
 import { useEffect, useState, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 //import {useRoute} from '@react-navigation/native';

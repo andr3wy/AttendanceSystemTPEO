@@ -2,6 +2,7 @@ import "./Home.css";
 import { useEffect, useState, Fragment } from "react";
 //import { useNavigate } from "react-router-dom";
 import { useHistory } from "react-router-dom";
+import ".//image_2.png";
 
 /*Modify the Home.js file with the following:
 Make buttons with entry types: 
@@ -32,6 +33,12 @@ export default function Home(props) {
   return (
     <Fragment>
       <div id="new_container">
+        
+      {/*<img
+              className="tpeoLogoPhoto"
+              src={"./image_2.png"}
+              alt="tpeo logo here"
+      />*/}
         <h2 id= "home_header"> TPEO Attendance</h2>
         
             <input 
