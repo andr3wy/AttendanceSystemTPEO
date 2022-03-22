@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import './FinalTable.css';
+import React, { useState, useEffect, Fragment } from 'react';
+import './MemberTable.css';
 import { forwardRef } from 'react';
 //import Avatar from 'react-avatar';
 import Grid from '@material-ui/core/Grid'
+//import { useHistory } from "react-router-dom";
 
 import MaterialTable from "material-table";
 import AddBox from '@material-ui/icons/AddBox';
@@ -48,16 +49,13 @@ const api = axios.create({
 })
 
 
-/*function validateEmail(email){
-  const re = /^((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))$/;
-  return re.test(String(email).toLowerCase());
-}*/
 
-export default function FinalTable() {
+export default function MemberTable() {
+
+  //const history=useHistory();
 
   var columns = [
     {title: "id", field: "id", hidden: true},
-    //{title: "Avatar", render: rowData => <Avatar maxInitials={1} size={40} round={true} name={rowData === undefined ? " " : rowData.first_name} />  },
     {title: "Name", field: "full"},
     {title: "Fellowship", field: "fellowship"},
     {title: "Attendance", field: "attendance"}
@@ -78,8 +76,39 @@ export default function FinalTable() {
          })
   }, [])
 
+  
+  {/*
+  async function loadMembers() {
+    const request = await fetch("http://localhost:2000/getAll" );
+    const response = await request.json();
+    const status = await request.status;
+
+    // Success, load all the todos
+    if (status == 200) {
+      const data=response.data;
+      console.log(data);
+      let names= [];
+      let fellowships= [];
+      let attendance= [];
+      for (let i= 0; i<data.length; i++)
+      {
+        temp= data[i];
+        console.log(temp);
+        if (!temp.status){
+          todos.push(temp);
+        }
+        else{
+          done.push(temp);
+        }
+      }
+      setDone(done);
+      setToDo(todos);
+    }
+  }
+*/}
+
   //new,old date just row to be updated
-  const handleRowUpdate = (newData, oldData, resolve) => {
+  async function handleRowUpdate(newData, oldData, resolve) {
     //validation
     let errorList = []
     if(newData.name === ""){
@@ -95,8 +124,20 @@ export default function FinalTable() {
     
     //if there are no errors with row update: all fields complete and valid
     if(errorList.length < 1){
-      api.patch("/users/"+newData.id, newData)
+      api.patch("/users/"+newData.id, newData)/*
+      const request = await fetch("http://localhost:3000/create-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ description: newData }),
+      });
+      // Get Status and Response
+      const response = await request.json();
+      const status = await request.status;*/
       .then(res => {
+
+      //if (status == 200) {
         const dataUpdate = [...data]; //data=all current data in database
         //get the index of the row using its unique id 
         const index = oldData.tableData.id;
@@ -105,8 +146,9 @@ export default function FinalTable() {
         resolve()
         setIserror(false)
         setErrorMessages([])
-      })
-      .catch(error => {
+      //}//)
+      //.catch(error => {
+      /*else
         setErrorMessages(["Update failed! Server error"])
         setIserror(true)
         resolve()
@@ -116,9 +158,10 @@ export default function FinalTable() {
       setErrorMessages(errorList)
       setIserror(true)
       resolve()
+      */
 
-    }
-    
+    })
+  }
   }
 
   const handleRowAdd = (newData, resolve) => {
@@ -194,7 +237,7 @@ export default function FinalTable() {
           </div>
             <MaterialTable
               id= "materialTable"
-              style={{ width: '80vw',  left: '-30%', top: '14%'}}
+              style={{ width: '80vw',  left: '-30%', top: '-20%'}}
               title="Members"
               columns={columns}
               data={data}
@@ -222,4 +265,3 @@ export default function FinalTable() {
   );
 }
 
-//export default App;
