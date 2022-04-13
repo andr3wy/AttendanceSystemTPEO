@@ -14,8 +14,9 @@ export default function IndividAttendance(props) {
   const history = useHistory();
   /*const route = useRoute();
   console.log(route.name);*/
+    let self = this;
     let meetings = {};
-    var productCount = 0;
+    let productCount = 0;
     var generalCount = 0;
     var designCount = 0;
     var engineeringCount = 0;
@@ -72,7 +73,7 @@ export default function IndividAttendance(props) {
         // console.log(temp);
         // console.log(meetings);
 
-        // setMeetings(temp);
+        setMeetings(temp);
 
 
 
@@ -85,7 +86,7 @@ export default function IndividAttendance(props) {
         console.log("peneneisisis")
         handleData({id:location.state.id});
 
-    })
+    }, [])
 
     console.log("right before");
 
@@ -102,16 +103,16 @@ export default function IndividAttendance(props) {
             <div id= "attendance_info">
                 <h3 id= "attendance_header"> Attendance</h3>
                 <div>
-                    Product: {productCount}
+                    Product: {meeting.Product}
                 </div>
                 <div>
-                    General: {generalCount}
+                    General: {meeting.General}
                 </div>
                 <div>
-                    Design: {designCount}
+                    Design: {meeting.Design}
                 </div>
                 <div>
-                    Engineering: {engineeringCount}
+                    Engineering: {meeting.Engineering}
                 </div>
             </div>
         </div>
