@@ -154,6 +154,8 @@ const api = axios.create({
 
         if (status===200){
           let dataToAdd = [...data]; //data=all current data in database
+          console.log("teeeemmmp" + response.msg);
+          newData.id = response.msg;
           dataToAdd.push(newData);
           setData(dataToAdd);
           resolve()
@@ -239,11 +241,14 @@ const api = axios.create({
     //api.delete("/users/"+oldData.id)
       //.then(res => {
       if (status===200){
+        console.log("pizookie 1")
         const dataDelete = [...data];
         const index = oldData.tableData.index;
         dataDelete.splice(index, 1);
         setData([...dataDelete]);
-        //resolve()
+        console.log("pizookie");
+        // setData([]);
+        resolve()
       }
       //)
       //.catch(error => {

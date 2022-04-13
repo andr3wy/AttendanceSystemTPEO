@@ -288,7 +288,7 @@ const api = axios.create({
         const index = oldData.tableData.index;
         dataDelete.splice(index, 1);
         setData([...dataDelete]);
-        //resolve()
+        resolve()
       }
       //)
       //.catch(error => {
@@ -327,7 +327,9 @@ const api = axios.create({
               //onRowClick={onRowClick}
               onRowClick={(event, rowData) => {
                 //for a static path with no params
-                history.push("/IndividAttendance");
+                console.log(rowData.id);
+                history.push({pathname:"/IndividAttendance",
+                state: {id: rowData.id}});
                 //for dynamic path with id coming from data, feel free to edit history.push above
               }}
               editable={{

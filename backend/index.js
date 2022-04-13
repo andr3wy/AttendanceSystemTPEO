@@ -178,7 +178,8 @@ app.post("/create-meeting", async(request, response) => {
 
     })
 
-    return response.json({msg:"added successfully"});
+
+    return response.json({msg:temp.id});
 
 
 });
@@ -288,7 +289,7 @@ app.post("/delete", async(request, response) => {
 
 })
 
-app.get("/statsuser", async(request, response) => {
+app.post("/statsuser", async(request, response) => {
     let id = request.body.id;
     console.log(id);
     let list = await database.collection('roster').doc(id);
@@ -408,6 +409,8 @@ app.post("/deletemeeting", async(request, response) => {
     })
     list.delete();
 
+    return response.json({"msg":"done"})
+
 
 
 
@@ -425,7 +428,7 @@ app.get("/allmeetings", async(request, response) => {
         let peopleTemp = docData.people;
         //let startTemp = docData.start.toMillis();
         //let startTemp = docData.start;
-       let startTemp= new Date(docData.start.toMillis()).toISOString();
+        let startTemp= new Date(docData.start.toMillis()).toISOString();
 
         let result = startTemp.substring(0,10)+ " " + startTemp.substring(11,16);
         let endTemp= new Date(docData.end.toMillis()).toISOString();
