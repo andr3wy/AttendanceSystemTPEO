@@ -1,11 +1,11 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MemberTable.css';
 import { forwardRef } from 'react';
 //import Avatar from 'react-avatar';
 import Grid from '@material-ui/core/Grid'
-//import { useHistory } from "react-router-dom";
 
-import MaterialTable from "material-table";
+import MaterialTable from '@material-table/core';
+import { useHistory } from "react-router-dom";
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import Check from '@material-ui/icons/Check';
@@ -23,6 +23,8 @@ import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import axios from 'axios'
 import Alert from '@material-ui/lab/Alert';
+
+import  "../../pages/IndividAttendance/IndividAttendance.js";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -50,65 +52,101 @@ const api = axios.create({
 
 
 
-export default function MemberTable() {
+//export default function MeetingTable() {
+  const MeetingTable = (props) => {
 
-  //const history=useHistory();
-
-  var columns = [
+    const history = useHistory();
+    const columns = [
     {title: "id", field: "id", hidden: true},
-    {title: "Name", field: "full"},
-    {title: "Fellowship", field: "fellowship"},
-    {title: "Attendance", field: "attendance"}
+    {title: "Name", field: "name" },
+    {title: "Fellowship", field: "fellowship"}
   ]
   const [data, setData] = useState([]); //all table (firebase database) data
-
+  
+  function onRowClick(event, rowData) {
+    this.props.onViewItem(this.props.endpoint, rowData.id);
+  }
   //for error handling
-  const [iserror, setIserror] = useState(false)
+  
+  /*const [iserror, setIserror] = useState(false)
   const [errorMessages, setErrorMessages] = useState([])
+  let initLoad= false;*/
+  let initLoad= false;
 
-  useEffect(() => { 
+  useEffect(() => {
+    const fetchData = async () => {
+       await fetch('http://localhost:4000/usersAndAttendance', {
+           method: 'GET',
+           headers: {
+               'Content-Type': 'application/json',
+           },
+       }).then((response) => {
+           response.json().then((json) => {
+               initLoad= true;
+               var gendata = json;
+               console.log('before setting data');
+               setData(gendata); 
+               console.log('new set data '+ data);
+           })
+       }).catch(error => {
+           console.log(error);
+       })
+       }
+       /*if (initLoad=== false){
+        fetchData();
+       }*/
+       fetchData();
+   }, [props.type])
+  
+   /*async function loadData(){
+    console.log("inside load data");
+    const request = await fetch("http://localhost:4000/usersAndAttendance", {
+                  method: "GET",
+                  mode: 'cors',
+                  headers: {'Content-Type': 'application/json'}
+              })
+              const response = await request.json();
+              const status = await request.status;
+              if (status === 200) {
+                const temp=response;
+                setData(temp);
+                console.log("loadData temp " + temp);
+              }
+                
+                
+                
+            }
+  
+  console.log("load data");
+  loadData();
+  */
+
+  /*useEffect(() => { 
     api.get("/users")
-        .then(res => {               
-            setData(res.data.data)
+        .then(res => {
+            console.log(res.data.data)
+            //setData(res.data.data)
          })
          .catch(error=>{
              console.log("Error")
          })
-  }, [])
+  }, [])*/
 
-  
-  {/*
-  async function loadMembers() {
-    const request = await fetch("http://localhost:2000/getAll" );
-    const response = await request.json();
-    const status = await request.status;
-
-    // Success, load all the todos
-    if (status == 200) {
-      const data=response.data;
-      console.log(data);
-      let names= [];
-      let fellowships= [];
-      let attendance= [];
-      for (let i= 0; i<data.length; i++)
-      {
-        temp= data[i];
-        console.log(temp);
-        if (!temp.status){
-          todos.push(temp);
-        }
-        else{
-          done.push(temp);
-        }
-      }
-      setDone(done);
-      setToDo(todos);
-    }
-  }
-*/}
+  /*const request = await fetch("http://localhost:4000/all-users", {
+                method: "POST",
+                mode: 'cors',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            const result = await request.json();
+            const status = await request.status;
+            console.log(result);*/
 
   //new,old date just row to be updated
-  async function handleRowUpdate(newData, oldData, resolve) {
+  //const handleRowUpdate = (newData, oldData, resolve) => {
+  async function handleRowAdd(newData,  resolve) {
+    console.log("newdata");
+    console.log(newData);
     //validation
     let errorList = []
     if(newData.name === ""){
@@ -117,38 +155,41 @@ export default function MemberTable() {
     if(newData.fellowship === ""){
       errorList.push("Please enter fellow type")
     }
-    //if(newData.email === "" || validateEmail(newData.email) === false){
-      if(newData.attendance === "" ){
-      errorList.push("Please enter attendance type")
-    }
+    console.log("errorList "+ errorList);
     
     //if there are no errors with row update: all fields complete and valid
     if(errorList.length < 1){
-      api.patch("/users/"+newData.id, newData)/*
-      const request = await fetch("http://localhost:3000/create-user", {
+      console.log("handleRowAdd name: "+ newData.name+ " fellowship: " + newData.fellowship);
+      const request = await fetch("http://localhost:4000/create-user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ description: newData }),
+        body: JSON.stringify({ name: newData.name, fellowship: newData.fellowship }),
       });
       // Get Status and Response
       const response = await request.json();
-      const status = await request.status;*/
-      .then(res => {
+      const status = await request.status;
 
-      //if (status == 200) {
-        const dataUpdate = [...data]; //data=all current data in database
-        //get the index of the row using its unique id 
-        const index = oldData.tableData.id;
-        dataUpdate[index] = newData;
-        setData([...dataUpdate]);
-        resolve()
-        setIserror(false)
-        setErrorMessages([])
-      //}//)
-      //.catch(error => {
-      /*else
+
+      //api.patch("/users/"+newData.id, newData)
+      //.then(res => {
+
+        if (status===200){
+          let dataToAdd = [...data]; //data=all current data in database
+          dataToAdd.push(newData);
+          setData(dataToAdd);
+          resolve()
+          /*setErrorMessages([])
+          setIserror(false)*/
+        }
+        console.log("print data");
+        console.log(JSON.stringify(data));
+        //console.log("data var after row add "+ JSON.stringify(data[1])+ "  " +data[2][1] );
+
+      
+  /*})
+      .catch(error => {
         setErrorMessages(["Update failed! Server error"])
         setIserror(true)
         resolve()
@@ -158,14 +199,17 @@ export default function MemberTable() {
       setErrorMessages(errorList)
       setIserror(true)
       resolve()
-      */
 
-    })
+    }*/
+    
   }
-  }
+}
 
-  const handleRowAdd = (newData, resolve) => {
+  //const handleRowUpdate = (newData, oldData, resolve) => {
+  async function handleRowUpdate (newData, oldData, resolve){
     //validation
+    console.log("new name"+ newData.name);
+    console.log("old name"+ oldData.name);
     let errorList = []
     if(newData.name === ""){
       errorList.push("Please enter member name")
@@ -173,22 +217,40 @@ export default function MemberTable() {
     if(newData.fellowship === ""){
       errorList.push("Please enter fellow type")
     }
-    //if(newData.email === "" || validateEmail(newData.email) === false){
-      if(newData.attendance === "" ){
-      errorList.push("Please enter attendance type")
-    }
 
     if(errorList.length < 1){ //no error
-      api.post("/users", newData)
-      .then(res => {
-        let dataToAdd = [...data]; //data=all current data in database
-        dataToAdd.push(newData);
-        setData(dataToAdd);
-        resolve()
-        setErrorMessages([])
-        setIserror(false)
-      })
-      .catch(error => {
+      //api.post("/users", newData)
+
+      console.log("handleRowUpdate name: "+ newData.name+ " fellowship: " + newData.fellowship);
+      const request = await fetch("http://localhost:4000/change-name", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: oldData.name, newName:newData.name }),
+      });
+      // Get Status and Response
+      const response = await request.json();
+      const status = await request.status;
+
+
+
+      //.then(res => {
+        if (status === 200) {
+
+          const dataUpdate = [...data]; //data=all current data in database
+          //get the index of the row using its unique id 
+          const index = oldData.tableData.id;
+          dataUpdate[index] = newData;
+          setData([...dataUpdate]);
+          console.log("data update after row update " +dataUpdate);
+          console.log("set data after row update " + setData);
+          resolve()
+          /*setIserror(false)
+          setErrorMessages([])*/
+      }
+      //})
+      /*.catch(error => {
         setErrorMessages(["Cannot add data. Server error!"])
         setIserror(true)
         resolve()
@@ -197,26 +259,46 @@ export default function MemberTable() {
       setErrorMessages(errorList)
       setIserror(true)
       resolve()
+      */
     }
 
     
   }
 
-  const handleRowDelete = (oldData, resolve) => {
+  async function handleRowDelete (oldData, resolve) {
     
-    api.delete("/users/"+oldData.id)
-      .then(res => {
+    console.log(" handleRowDelete id: "+ oldData.id+" handleRowDelete name: "+ oldData.name+ " fellowship: " + oldData.fellowship);
+    console.log(oldData);
+      const request = await fetch("http://localhost:4000/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: oldData.id}),
+      });
+      // Get Status and Response
+      const response = await request.json();
+      const status = await request.status;
+
+
+    //api.delete("/users/"+oldData.id)
+      //.then(res => {
+      if (status===200){
         const dataDelete = [...data];
-        const index = oldData.tableData.id;
+        const index = oldData.tableData.index;
         dataDelete.splice(index, 1);
         setData([...dataDelete]);
+        //resolve()
+      }
+      //)
+      //.catch(error => {
+      else{
+        console.log('delete failed');
+        /*setErrorMessages(["Delete failed! Server error"])
+        setIserror(true)*/
         resolve()
-      })
-      .catch(error => {
-        setErrorMessages(["Delete failed! Server error"])
-        setIserror(true)
-        resolve()
-      })
+      }
+      //)
   }
 
 
@@ -226,7 +308,7 @@ export default function MemberTable() {
       <Grid container spacing={1}>
           <Grid item xs={3}></Grid>
           <Grid item xs={6}>
-          <div>
+          {/*<div>
             {iserror && 
               <Alert severity="error">
                   {errorMessages.map((msg, i) => {
@@ -234,14 +316,20 @@ export default function MemberTable() {
                   })}
               </Alert>
             }       
-          </div>
+          </div>*/}
             <MaterialTable
               id= "materialTable"
               style={{ width: '80vw',  left: '-30%', top: '-20%'}}
-              title="Members"
+              title="Member Manager"
               columns={columns}
               data={data}
               icons={tableIcons}
+              //onRowClick={onRowClick}
+              onRowClick={(event, rowData) => {
+                //for a static path with no params
+                history.push("/IndividAttendance");
+                //for dynamic path with id coming from data, feel free to edit history.push above
+              }}
               editable={{
                 onRowUpdate: (newData, oldData) =>
                   new Promise((resolve) => {
@@ -265,3 +353,4 @@ export default function MemberTable() {
   );
 }
 
+export default MeetingTable;

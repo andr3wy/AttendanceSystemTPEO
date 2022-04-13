@@ -6,7 +6,6 @@ const dotenv = require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT;
-const fs = require('fs')
 
 // const auth = require("./auth/auth.js");
 
@@ -135,49 +134,9 @@ app.get("/all-users", async(request, response) => {
         let docData = doc.data();
         let name = docData.name;
         users[name] = doc.id;
-        //users[name] = docData.fellowship;
     });
     return response.json(users);
 });
-
-//new query for getting user name+fellowship type
-app.get("/usersAndAttendance", async(request, response) => {
-    let allUsers = await database.collection('roster').get();
-    let users = [];
-    let index=0;
-    allUsers.forEach((doc) => {
-        let docData = doc.data();
-        let tempname = docData.name;
-        let temptype = docData.fellowship;
-        /*const tableinsert= {
-            id: 20
-        }*/
-        const newUser= {
-            id: doc.id,
-            name: docData.name,
-            //name: tempname.replaceAll('\\', ''),
-            fellowship: docData.fellowship
-            //fellowship: temptype.replaceAll('\\', '')
-        }
-        /*let name = docData.name;
-        let type = docData.fellowship;*/
-        jsonString= JSON.stringify(newUser);
-        users[index]=newUser;
-        index++;
-    });
-    //return input.json;
-    return response.json(users);
-});
-
-/*
-const customer = {
-  name: "Newbie Corp.",
-  order_count: 0,
-  address: "Po Box City"
-};
-const jsonString = JSON.stringify(customer);
-console.log(jsonString);
-*/
 
 
 // //create meeting document under meetings collection
@@ -191,7 +150,7 @@ app.post("/create-meeting", async(request, response) => {
     allMeetings.forEach((doc) => {
         let meetingdata = doc.data();
 
-        if(((meetingdata.start <= end && meetingdata.start >= start) ||  (meetingdata.end >= start && meetingdata.end <= end )) && type === meetingdata.type) {
+        if(((meetingdata.start.toMillis() <= end && meetingdata.start.toMillis() >= start) ||  (meetingdata.end.toMillis() >= start && meetingdata.end.toMillis() <= end )) && type === meetingdata.type) {
 
             validTime = true;
             correctMeeting = doc;
@@ -278,6 +237,7 @@ app.post("/create-user", async(request, response) => {
     });
 
     if(!found) {
+
         const temp = await database.collection('roster').add({
             name: `${name}`,
             fellowship: `${type}`,
@@ -298,14 +258,6 @@ app.post("/create-user", async(request, response) => {
 app.get("/meetings", async(request, response) => {
     let name = request.body.name;
     let nameDocument = await database.collection('roster').where('name', '==', name).get();
-
-})
-
-app.get("/userID", async(request, response) => {
-    let name = request.body.name;
-    let nameDocument = await database.collection('roster').where('name', '==', name).get();
-    let docID= nameDocument.id;
-    return response.json({"id": nameDocument});
 
 })
 
@@ -405,4 +357,117 @@ app.get("/statsmeeting", async(request, response) => {
 
 })
 
+app.post("/deletemeeting", async(request, response) => {
+    let id = request.body.id;
 
+    let list = await database.collection('meetings').doc(id);
+    console.log(list);
+    let doc = await list.get();
+    let docData = doc.data();
+
+    let people = docData.people;
+
+
+
+    let allUsers = await database.collection('roster').get();
+    let users = {};
+    allUsers.forEach((doc) => {
+        let docData = doc.data();
+        let name = docData.name;
+        users[name] = doc.id;
+    });
+
+    people.forEach(async (person)=> {
+        let userID = users[person];
+        let user = await database.collection('roster').doc(userID);
+        let userDoc = await user.get();
+        let userData = userDoc.data();
+        let pms = userData.Product;
+        let gms = userData.General;
+        let dms = userData.Design;
+        let ems = userData.Engineering;
+
+        let pmsTemp = pms.filter((element) => {
+            element != id;
+        })
+        user.update({Product: pmsTemp})
+        let gmsTemp = gms.filter((element) => {
+            element != id;
+        })
+        user.update({General: gmsTemp})
+
+        let dmsTemp = dms.filter((element) => {
+            element != id;
+        })
+        user.update({Design: dmsTemp})
+        let emsTemp = ems.filter((element) => {
+            element != id;
+        })
+
+        user.update({Engineering: emsTemp});
+    })
+    list.delete();
+
+
+
+
+})
+
+
+app.get("/allmeetings", async(request, response) => {
+    let allMeetings = await database.collection('meetings').get();
+    let meetings =[];
+    let index = 0;
+    allMeetings.forEach((meeting) => {
+        let docData = meeting.data();
+        let typeTemp = docData.type;
+        let numberTemp = docData.number;
+        let peopleTemp = docData.people;
+        //let startTemp = docData.start.toMillis();
+        //let startTemp = docData.start;
+       let startTemp= new Date(docData.start.toMillis()).toISOString();
+
+        let result = startTemp.substring(0,10)+ " " + startTemp.substring(11,16);
+        let endTemp= new Date(docData.end.toMillis()).toISOString();
+        let endresult = endTemp.substring(0,10)+ " " + startTemp.substring(11,16);
+        const newMeeting = {
+            id: meeting.id,
+            type: typeTemp,
+            number: numberTemp,
+            people: peopleTemp,
+            start: result,
+            end: endresult
+        }
+        meetings.push(newMeeting);
+    })
+    return response.json(meetings);
+
+})
+
+app.get("/usersAndAttendance", async(request, response) => {
+    let allUsers = await database.collection('roster').get();
+    let users = [];
+    let index=0;
+    allUsers.forEach((doc) => {
+        let docData = doc.data();
+        let tempname = docData.name;
+        let temptype = docData.fellowship;
+        /*const tableinsert= {
+            id: 20
+        }*/
+        const newUser= {
+            id: doc.id,
+            name: docData.name,
+            //name: tempname.replaceAll('\\', ''),
+            fellowship: docData.fellowship
+            //fellowship: temptype.replaceAll('\\', '')
+        }
+        /*let name = docData.name;
+        let type = docData.fellowship;*/
+        jsonString= JSON.stringify(newUser);
+        users[index]=newUser;
+        index++;
+    });
+    //return input.json;
+    return response.json(users);
+});
