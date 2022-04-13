@@ -14,7 +14,12 @@ export default function IndividAttendance(props) {
   const history = useHistory();
   /*const route = useRoute();
   console.log(route.name);*/
-    const [meetings, setMeetings] = useState({});
+    let meetings = {};
+    var productCount = 0;
+    var generalCount = 0;
+    var designCount = 0;
+    var engineeringCount = 0;
+    const[meeting, setMeetings] = useState({})
     async function handleData(data) {
         console.log(data);
         const request = await fetch("http://localhost:4000/statsuser", {
@@ -51,18 +56,40 @@ export default function IndividAttendance(props) {
         temp.Engineering = engineering;
         temp.Design = design;
 
+        // meetings.Product = product;
+        // meetings.General = general;
+        // meetings.Engineering = engineering;
+        // meetings.Design = design;
+        //
+        productCount = product;
+        generalCount = general;
+        engineeringCount = engineering;
+        designCount = design;
+        // console.log(productCount);
+        // console.log(designCount);
+        //
+        //
+        // console.log(temp);
+        // console.log(meetings);
 
-        setMeetings(temp)
-        console.log(temp);
+        // setMeetings(temp);
 
 
 
     }
+    console.log("meetings");
+    // console.log(meetings);
     const location = useLocation()
     console.log(location.state.id);
     useEffect(() => {
+        console.log("peneneisisis")
         handleData({id:location.state.id});
+
     })
+
+    console.log("right before");
+
+    console.log(designCount);
 
 
 
@@ -75,16 +102,16 @@ export default function IndividAttendance(props) {
             <div id= "attendance_info">
                 <h3 id= "attendance_header"> Attendance</h3>
                 <div>
-                    Product: {meetings.Product}
+                    Product: {productCount}
                 </div>
                 <div>
-                    Product: {meetings.Product}
+                    General: {generalCount}
                 </div>
                 <div>
-                    Product: {meetings.Product}
+                    Design: {designCount}
                 </div>
                 <div>
-                    Product: {meetings.Product}
+                    Engineering: {engineeringCount}
                 </div>
             </div>
         </div>
